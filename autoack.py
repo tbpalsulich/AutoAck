@@ -56,11 +56,11 @@ def handle(ircmsg, commands):
 
 def learn(key, value):
   if key not in default_commands:
-    user_commands[key] = " ".join(value)
     if key in user_commands:
       send("Relearned " + key)
     else:
       send("Learned " + key)
+    user_commands[key] = " ".join(value)
   else:
     send("Go away!")
 
