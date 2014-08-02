@@ -18,16 +18,20 @@ limitations under the License.
 import socket
 import sys
 
-if len(sys.argv) == 1 or len(sys.argv) > 4:
-  print("Usage: autoack.py #channel [nick [server]]")
+# Check if we need to print help.
+if len(sys.argv) == 1 or len(sys.argv) > 4 or sys.argv[1].find("#") != 0:
+  print("Usage: python autoack.py #channel [nick [server]]")
   sys.exit()
 
+# Variables for how to connect the bot.
 channel = sys.argv[1] # Channel
-botnick = "AutoAck" if len(sys.argv) < 3 else sys.argv[3] # Your bots nick
+botnick = "AutoAck" if len(sys.argv) < 3 else sys.argv[2] # Nickname
 server = "chat.freenode.net" if len(sys.argv) < 4 else sys.argv[3] # Server
 
+# Substring used to split the received message into the actual message content
 splitter = "PRIVMSG " + channel + " :"
 
+# Map from keywords to how the bot will respond in chat.
 default_commands = {
             "ack":  "ack",
             "git":  "#gitpush",
@@ -38,22 +42,28 @@ default_commands = {
             "bewm": "ba-bewm!!!",
             "seen": "seen like an eaten jelly bean"}
 
+# Map where chatroom members can have the bot "learn" commands.
 user_commands = {}
 
+# Respond to a PING from the server.
 def pong(data):
   ircsock.send("PONG " + data.split()[1] + "\n")  
 
-def send(msg):
+# Send a message to the connected server.
+def send(message):
   ircsock.send("PRIVMSG " + channel + " :" + msg + "\n")
 
 def join_channel(channel):
   ircsock.send("JOIN " + channel + "\n")
 
+# Respond to any keywords from the map `commands` in the string `ircmsg`.
 def handle(ircmsg, commands):
   for key in commands:
     if key in ircmsg:
       send((commands[key] + " ") * ircmsg.count(key, 0))
 
+# Store the given key and value in the user_commands map. But, do not
+# allow the users to change default commands.
 def learn(key, value):
   if key not in default_commands:
     if key in user_commands:
@@ -64,6 +74,7 @@ def learn(key, value):
   else:
     send("Go away!")
 
+# Forget the user command with the given key.
 def forget(key):
   if key in default_commands:
     send("No.")
@@ -78,35 +89,39 @@ def send_help():
   send("   " + botnick + ": learn [key] [value]")
   send("   " + botnick + ": forget [key]")
 
+# Connect to the server.
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-ircsock.connect((server, 6667)) # Here we connect to the server using the port 6667
-ircsock.send("USER " + botnick + " " + botnick + " " + botnick + " :.\n") # user authentication
-ircsock.send("NICK " + botnick + "\n") # here we actually assign the nick to the bot
+ircsock.connect((server, 6667)) # Connect to the server using port 6667.
+ircsock.send("USER " + botnick + " " + botnick + " " + botnick + " :.\n") # Authenticate the bot.
+ircsock.send("NICK " + botnick + "\n") # Assign the nickname to the bot.
 
-join_channel(channel) # Join the channel using the functions we previously defined
+join_channel(channel)
 
+# Loop forever, waiting for messages to arrive.
 while 1:
-  ircmsg = ircsock.recv(2048) # receive data from the server
-  ircmsg = ircmsg.strip('\n\r') # removing any unnecessary linebreaks.
+  ircmsg = ircsock.recv(2048) # Receive data from the server.
+  ircmsg = ircmsg.strip('\n\r') # Remove any unnecessary linebreaks.
+
   print(ircmsg)
 
   if "PING :" in ircmsg: pong(ircmsg)
 
+  # Only respond to chat from the current chatroom (not private or administrative log in messages).
   if splitter not in ircmsg: continue
 
+  # Get the content of the message.
   ircmsg = ircmsg.split(splitter)[1]
 
+  # Convert to lowercase and split the message based on whitespace.
   split = ircmsg.lower().split()
 
-  print split
-
-  if split[0] == botnick.lower() + ":":
+  if split[0] == botnick.lower() + ":":   # Command addressed to the bot (e.g. learn or forget).
     if split[1] == "learn" and len(split) > 2:
       learn(split[2], ircmsg.split()[3:])
     if split[1] == "forget":
       forget(split[2])
     if split[1] == "help":
       send_help()
-  else:
+  else:   # Only handle messages that aren't sent directly to the bot.
     handle(ircmsg, default_commands)
     handle(ircmsg, user_commands)
