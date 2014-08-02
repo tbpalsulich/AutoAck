@@ -1,11 +1,30 @@
-# This bot is a result of a tutoral covered on http://shellium.org/wiki.
-# Import some necessary libraries.
-import socket 
+'''
+Copyright 2014 Tyler Palsulich
 
-# Some basic variables used to configure the bot        
-server = "chat.freenode.net" # Server
-channel = "#xdata-ops" # Channel
-botnick = "AutoAck" # Your bots nick
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+'''
+
+# This bot is a result of a tutoral covered on http://shellium.org/wiki.
+import socket
+import sys
+
+if len(sys.argv) == 1 or len(sys.argv) > 4:
+  print("Usage: autoack.py #channel [nick [server]]")
+  sys.exit()
+
+channel = sys.argv[1] # Channel
+botnick = "AutoAck" if len(sys.argv) < 3 else sys.argv[3] # Your bots nick
+server = "chat.freenode.net" if len(sys.argv) < 4 else sys.argv[3] # Server
 
 splitter = "PRIVMSG " + channel + " :"
 
@@ -56,8 +75,8 @@ def forget(key):
 
 def send_help():
   send("Available commands:")
-  send("   AutoAck: learn [key] [value]")
-  send("   AutoAck: forget [key]")
+  send("   " + botnick + ": learn [key] [value]")
+  send("   " + botnick + ": forget [key]")
 
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 ircsock.connect((server, 6667)) # Here we connect to the server using the port 6667
@@ -81,7 +100,7 @@ while 1:
 
   print split
 
-  if split[0] == "autoack:":
+  if split[0] == botnick.lower() + ":":
     if split[1] == "learn" and len(split) > 2:
       learn(split[2], ircmsg.split()[3:])
     if split[1] == "forget":
