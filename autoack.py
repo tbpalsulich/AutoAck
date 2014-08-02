@@ -1,53 +1,93 @@
 # This bot is a result of a tutoral covered on http://shellium.org/wiki.
 # Import some necessary libraries.
 import socket 
-import time
 
 # Some basic variables used to configure the bot        
 server = "chat.freenode.net" # Server
-channel = "#test-ops" # Channel
+channel = "#xdata-ops" # Channel
 botnick = "AutoAck" # Your bots nick
 
 splitter = "PRIVMSG " + channel + " :"
 
-def ping(data):
+default_commands = {
+            "ack":  "ack",
+            "git":  "#gitpush",
+            "aye":  "aye, mate!",
+            "+1":   "+1",
+            "boom": "kaboom!!!",
+            "beum": "kabeum!!!",
+            "bewm": "ba-bewm!!!",
+            "seen": "seen like an eaten jelly bean"}
+
+user_commands = {}
+
+def pong(data):
   ircsock.send("PONG " + data.split()[1] + "\n")  
 
 def send(msg):
   ircsock.send("PRIVMSG " + channel + " :" + msg + "\n")
 
-def join_channel(chan):
-  ircsock.send("JOIN " + chan + "\n")
+def join_channel(channel):
+  ircsock.send("JOIN " + channel + "\n")
 
-def handle(ircmsg, key, msg):
-  if ircmsg.find(key) != -1:
-    send ((msg + " ") * ircmsg.count(key, 0))
-                  
+def handle(ircmsg, commands):
+  for key in commands:
+    if key in ircmsg:
+      send((commands[key] + " ") * ircmsg.count(key, 0))
+
+def learn(key, value):
+  if key not in default_commands:
+    user_commands[key] = " ".join(value)
+    if key in user_commands:
+      send("Relearned " + key)
+    else:
+      send("Learned " + key)
+  else:
+    send("Go away!")
+
+def forget(key):
+  if key in default_commands:
+    send("No.")
+  elif key in user_commands:
+    user_commands.pop(key) 
+    send("Dropped like a bad habit.")
+  else:
+    send("Maybe you're the one forgetting...")
+
+def send_help():
+  send("Available commands:")
+  send("   AutoAck: learn [key] [value]")
+  send("   AutoAck: forget [key]")
+
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 ircsock.connect((server, 6667)) # Here we connect to the server using the port 6667
-ircsock.send("USER "+ botnick +" "+ botnick +" "+ botnick +" :.\n") # user authentication
-ircsock.send("NICK "+ botnick +"\n") # here we actually assign the nick to the bot
+ircsock.send("USER " + botnick + " " + botnick + " " + botnick + " :.\n") # user authentication
+ircsock.send("NICK " + botnick + "\n") # here we actually assign the nick to the bot
 
 join_channel(channel) # Join the channel using the functions we previously defined
 
-while 1: # Be careful with these! it might send you to an infinite loop
+while 1:
   ircmsg = ircsock.recv(2048) # receive data from the server
   ircmsg = ircmsg.strip('\n\r') # removing any unnecessary linebreaks.
-  print(ircmsg) # Here we print what's coming from the server
+  print(ircmsg)
 
-  if ircmsg.find("PING :") != -1: # if the server pings us then we've got to respond!
-    ping(ircmsg)
+  if "PING :" in ircmsg: pong(ircmsg)
 
-  if ircmsg.find(splitter) == -1:
-    continue
+  if splitter not in ircmsg: continue
 
-  print ircmsg.split(splitter)
-  ircmsg = ircmsg.split(splitter)[1].lower()
+  ircmsg = ircmsg.split(splitter)[1]
 
-  handle(ircmsg, "ack", "ack")
-  handle(ircmsg, "git", "#gitpush")
-  handle(ircmsg, "aye", "aye, mate!")
-  handle(ircmsg, "+1", "ack, +1")
-  handle(ircmsg, "boom", "Kaboom!!!")
-  handle(ircmsg, "beum", "Kabeum!!!")
-  handle(ircmsg, "bewm", "Ba-bewm")
+  split = ircmsg.lower().split()
+
+  print split
+
+  if split[0] == "autoack:":
+    if split[1] == "learn" and len(split) > 2:
+      learn(split[2], ircmsg.split()[3:])
+    if split[1] == "forget":
+      forget(split[2])
+    if split[1] == "help":
+      send_help()
+  else:
+    handle(ircmsg, default_commands)
+    handle(ircmsg, user_commands)
