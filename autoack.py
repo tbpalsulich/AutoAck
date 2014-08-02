@@ -51,16 +51,16 @@ def pong(data):
 
 # Send a message to the connected server.
 def send(message):
-  ircsock.send("PRIVMSG " + channel + " :" + msg + "\n")
+  ircsock.send("PRIVMSG " + channel + " :" + message + "\n")
 
 def join_channel(channel):
   ircsock.send("JOIN " + channel + "\n")
 
-# Respond to any keywords from the map `commands` in the string `ircmsg`.
-def handle(ircmsg, commands):
+# Respond to any keywords from the map `commands` in the string `message`.
+def handle(message, commands):
   for key in commands:
-    if key in ircmsg:
-      send((commands[key] + " ") * ircmsg.count(key, 0))
+    if key in message:
+      send((commands[key] + " ") * message.count(key, 0))
 
 # Store the given key and value in the user_commands map. But, do not
 # allow the users to change default commands.
@@ -99,29 +99,29 @@ join_channel(channel)
 
 # Loop forever, waiting for messages to arrive.
 while 1:
-  ircmsg = ircsock.recv(2048) # Receive data from the server.
-  ircmsg = ircmsg.strip('\n\r') # Remove any unnecessary linebreaks.
+  message = ircsock.recv(2048) # Receive data from the server.
+  message = message.strip('\n\r') # Remove any unnecessary linebreaks.
 
-  print(ircmsg)
+  print(message)
 
-  if "PING :" in ircmsg: pong(ircmsg)
+  if "PING :" in message: pong(message)
 
   # Only respond to chat from the current chatroom (not private or administrative log in messages).
-  if splitter not in ircmsg: continue
+  if splitter not in message: continue
 
   # Get the content of the message.
-  ircmsg = ircmsg.split(splitter)[1]
+  message = message.split(splitter)[1]
 
   # Convert to lowercase and split the message based on whitespace.
-  split = ircmsg.lower().split()
+  split = message.lower().split()
 
   if split[0] == botnick.lower() + ":":   # Command addressed to the bot (e.g. learn or forget).
     if split[1] == "learn" and len(split) > 2:
-      learn(split[2], ircmsg.split()[3:])
+      learn(split[2], message.split()[3:])
     if split[1] == "forget":
       forget(split[2])
     if split[1] == "help":
       send_help()
   else:   # Only handle messages that aren't sent directly to the bot.
-    handle(ircmsg.lower(), default_commands)
-    handle(ircmsg.lower(), user_commands)
+    handle(message.lower(), default_commands)
+    handle(message.lower(), user_commands)
