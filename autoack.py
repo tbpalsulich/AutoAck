@@ -123,5 +123,5 @@ while 1:
     if split[1] == "help":
       send_help()
   else:   # Only handle messages that aren't sent directly to the bot.
-    handle(ircmsg, default_commands)
-    handle(ircmsg, user_commands)
+    handle(ircmsg.lower(), default_commands)
+    handle(ircmsg.lower(), user_commands)
