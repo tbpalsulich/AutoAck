@@ -17,6 +17,7 @@ limitations under the License.
 # This bot is a result of a tutoral covered on http://shellium.org/wiki.
 import socket
 import sys
+from datetime import datetime
 
 # Check if we need to print help.
 if len(sys.argv) == 1 or len(sys.argv) > 4 or sys.argv[1].find("#") != 0:
@@ -30,6 +31,9 @@ server = "chat.freenode.net" if len(sys.argv) < 4 else sys.argv[3] # Server
 
 # Substring used to split the received message into the actual message content
 splitter = "PRIVMSG " + channel + " :"
+
+# Time used to prevent sending messages while in quiet mode.
+can_send_after = datetime.now()
 
 # Map from keywords to how the bot will respond in chat.
 default_commands = {
@@ -51,7 +55,8 @@ def pong(data):
 
 # Send a message to the connected server.
 def send(message):
-  ircsock.send("PRIVMSG " + channel + " :" + message + "\n")
+  if datetime.now() > can_send_after:
+    ircsock.send("PRIVMSG " + channel + " :" + message + "\n")
 
 def join_channel(channel):
   ircsock.send("JOIN " + channel + "\n")
@@ -122,6 +127,8 @@ while 1:
       forget(split[2])
     if split[1] == "help":
       send_help()
+    if split[1] == "quiet":
+      can_send_after = datetime.now() + datetime.timedelta(seconds=30)
   else:   # Only handle messages that aren't sent directly to the bot.
     handle(message.lower(), default_commands)
     handle(message.lower(), user_commands)
