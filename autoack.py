@@ -18,6 +18,7 @@ limitations under the License.
 import socket
 import sys
 from datetime import datetime
+from datetime import timedelta
 
 # Check if we need to print help.
 if len(sys.argv) == 1 or len(sys.argv) > 4 or sys.argv[1].find("#") != 0:
@@ -130,7 +131,7 @@ while 1:
     if split[1] == "help":
       send_help()
     if split[1] == "quiet":
-      can_send_after = datetime.now() + datetime.timedelta(seconds=30)
+      can_send_after = datetime.now() + timedelta(seconds=30)
   else:   # Only handle messages that aren't sent directly to the bot.
     handle(message.lower(), default_commands)
     handle(message.lower(), user_commands)
