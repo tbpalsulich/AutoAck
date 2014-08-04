@@ -28,6 +28,7 @@ if len(sys.argv) == 1 or len(sys.argv) > 4 or sys.argv[1].find("#") != 0:
 channel = sys.argv[1] # Channel
 botnick = "AutoAck" if len(sys.argv) < 3 else sys.argv[2] # Nickname
 server = "chat.freenode.net" if len(sys.argv) < 4 else sys.argv[3] # Server
+port = 6667 # Port to connect on.
 
 # Substring used to split the received message into the actual message content
 splitter = "PRIVMSG " + channel + " :"
@@ -96,7 +97,8 @@ def send_help():
 
 # Connect to the server.
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-ircsock.connect((server, 6667)) # Connect to the server using port 6667.
+print("Attempting to connect to " + server + " on port " + str(port))
+ircsock.connect((server, port)) # Connect to the server using port 6667.
 ircsock.send("USER " + botnick + " " + botnick + " " + botnick + " :.\n") # Authenticate the bot.
 ircsock.send("NICK " + botnick + "\n") # Assign the nickname to the bot.
 
