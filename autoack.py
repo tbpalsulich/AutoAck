@@ -97,7 +97,7 @@ def send_help():
 
 # Connect to the server.
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print("Attempting to connect to " + server + " on port " + str(port))
+print("Attempting to connect to " + server + ":" + channel + " on port " + str(port) + " with username " + botnick)
 ircsock.connect((server, port)) # Connect to the server using port 6667.
 ircsock.send("USER " + botnick + " " + botnick + " " + botnick + " :.\n") # Authenticate the bot.
 ircsock.send("NICK " + botnick + "\n") # Assign the nickname to the bot.
