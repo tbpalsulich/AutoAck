@@ -21,14 +21,16 @@ from datetime import datetime
 from datetime import timedelta
 
 # Check if we need to print help.
-if len(sys.argv) == 1 or len(sys.argv) > 4 or sys.argv[1].find("#") != 0:
-  print("Usage: python autoack.py #channel [nick [server]]")
+if len(sys.argv) == 1 or len(sys.argv) > 5 or sys.argv[2].find("#") != 0:
+  print("Usage: python autoack.py quiet-seconds #channel [nick [server]]")
   sys.exit()
 
 # Variables for how to connect the bot.
-channel = sys.argv[1] # Channel
-botnick = "AutoAck" if len(sys.argv) < 3 else sys.argv[2] # Nickname
-server = "chat.freenode.net" if len(sys.argv) < 4 else sys.argv[3] # Server
+
+quiet_seconds = 30 if len(sys.argv) < 3 else int(sys.argv[1])
+channel = sys.argv[2] # Channel
+botnick = "AutoAck" if len(sys.argv) < 4 else sys.argv[3] # Nickname
+server = "chat.freenode.net" if len(sys.argv) < 5 else sys.argv[4] # Server
 port = 6667 # Port to connect on.
 
 # Substring used to split the received message into the actual message content
@@ -131,7 +133,7 @@ while 1:
     if split[1] == "help":
       send_help()
     if split[1] == "quiet":
-      can_send_after = datetime.now() + timedelta(seconds=30)
+      can_send_after = datetime.now() + timedelta(seconds=quiet_seconds)
   else:   # Only handle messages that aren't sent directly to the bot.
     handle(message.lower(), default_commands)
     handle(message.lower(), user_commands)
