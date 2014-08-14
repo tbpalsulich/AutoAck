@@ -18,20 +18,21 @@ limitations under the License.
 import socket
 import sys
 import argparse
+import atexit
+import shelve
 from datetime import datetime
 from datetime import timedelta
 
 parser = argparse.ArgumentParser(description='An IRC bot used to respond to keywords automatically.')
-parser.add_argument('-n', '--nick',    nargs=1, default='AutoAck',           help='Username of the bot')
-parser.add_argument('-s', '--server',  nargs=1, default='chat.freenode.net', help='Server to connect to')
-parser.add_argument('-q', '--quiet',   nargs=1, default=30,   type=int,      help='Default number of seconds to stay quiet when told')
-parser.add_argument('-p', '--port',    nargs=1, default=6667, type=int,      help='Port to use when connecting to the server.')
-parser.add_argument('channel',         nargs=1,               type=str,      help='Channel to connect to.')
+parser.add_argument('-n', '--nick',    default='AutoAck',           help='Username of the bot')
+parser.add_argument('-s', '--server',  default='chat.freenode.net', help='Server to connect to')
+parser.add_argument('-q', '--quiet',   default=30,   type=int,      help='Default number of seconds to stay quiet when told')
+parser.add_argument('-p', '--port',    default=6667, type=int,      help='Port to use when connecting to the server.')
+parser.add_argument('channel',                                      help='Channel to connect to.')
 
 args = parser.parse_args()
 
 # If the channel name doesn't start with a '#', prepend one.
-args.channel = args.channel[0]
 if args.channel != "#": args.channel = "#" + args.channel
 
 # Substring used to split the received message into the actual message content
@@ -52,7 +53,11 @@ default_commands = {
             "seen": ["seen like an eaten jelly bean", args.nick]}
 
 # Map where chatroom members can have the bot "learn" commands.
-user_commands = {}
+user_commands = shelve.open("autoack.shelf")
+
+# Save the user_commands shelf to memory.
+def save():
+  user_commands.close()
 
 # Check whether the given string is a positive number.
 # Based on http://stackoverflow.com/questions/354038/how-do-i-check-if-a-string-is-a-number-in-python.
@@ -124,6 +129,8 @@ ircsock.send("USER " + args.nick + " " + args.nick + " " + args.nick + " :.\n") 
 ircsock.send("NICK " + args.nick + "\n") # Assign the nickname to the bot.
 
 join_channel(args.channel)
+
+atexit.register(save)
 
 # Loop forever, waiting for messages to arrive.
 while 1:
