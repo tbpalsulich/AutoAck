@@ -97,11 +97,11 @@ def forget(key):
 
 def send_help():
   send("Available commands:")
-  send("   " + args.nick + ": learn [key] [value]")
-  send("   " + args.nick + ": forget [key]")
-  send("   " + args.nick + ": quiet")
-  send("   " + args.nick + ": quiet [seconds]")
-  send("   " + args.nick + ": speak")
+  send("   " + args.nick + ": learn [key] [value] (learn to say [value] after [key])")
+  send("   " + args.nick + ": forget [key] (forget user learned keyword [key])")
+  send("   " + args.nick + ": quiet [seconds] (don't send messages for an optional number of [seconds])")
+  send("   " + args.nick + ": speak (override previous quiet commands and send messages)")
+  send("   " + args.nick + ": list (print list of available keywords)")
 
 # Connect to the server.
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -138,11 +138,14 @@ while 1:
     elif split[1] == "help":
       send_help()
     elif split[1] == "quiet" and len(split) == 2:
-      can_send_after = datetime.now() + timedelta(seconds=quiet_seconds)
+      can_send_after = datetime.now() + timedelta(seconds=args.quiet)
     elif split[1] == "quiet" and len(split) == 3:
       can_send_after = datetime.now() + timedelta(seconds=int(split[2]))
     elif split[1] == "speak" and len(split) == 2:
       can_send_after = datetime.now()
+    elif split[1] == "list" and len(split) == 2:
+      send("Builtin commands: [" + ", ".join(default_commands) + "]")
+      send("User commands: [" + ", ".join(user_commands) + "]")
     else:
       send("Yes?")
   else:   # Only handle messages that aren't sent directly to the bot.
