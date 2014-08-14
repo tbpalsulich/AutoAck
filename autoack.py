@@ -112,7 +112,7 @@ def send_help():
   send("   " + args.nick + ": learn [key] [value] (learn to say [value] after [key])")
   send("   " + args.nick + ": forget [key] (forget user learned keyword [key])")
   send("   " + args.nick + ": quiet [seconds] (don't talk for optional number of [seconds])")
-  send("   " + args.nick + ": speak (override quiet and send messages)")
+  send("   " + args.nick + ": speak (override a previous quiet command)")
   send("   " + args.nick + ": list (print list of available keywords)")
   send("   " + args.nick + ": blame [key] (show user who created [key])")
 
