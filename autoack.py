@@ -165,11 +165,11 @@ while 1:
       if split[2] in default_commands:
         send(split[2] + " is a default command.", user)
       elif split[2] in user_commands:
-        send(user + ":" + split[2] + " was created by " + user_commands[split[2]][1])
+        send(split[2] + " was created by " + user_commands[split[2]][1], user)
       else:
-        send(user + ": That's not a valid keyword!")
+        send("That's not a valid keyword!", user)
     else:
-      send(user + ": How may I help you?")
+      send("How may I help you?", user)
   else:   # Only handle messages that aren't sent directly to the bot.
     handle(message.lower(), default_commands)
     handle(message.lower(), user_commands)
