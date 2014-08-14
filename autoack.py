@@ -99,6 +99,8 @@ def send_help():
   send("Available commands:")
   send("   " + args.nick + ": learn [key] [value]")
   send("   " + args.nick + ": forget [key]")
+  send("   " + args.nick + ": quiet")
+  send("   " + args.nick + ": quiet [seconds]")
 
 # Connect to the server.
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
