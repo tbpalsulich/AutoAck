@@ -120,11 +120,12 @@ def send_help():
   send("   " + args.nick + ": speak (override a previous quiet command)")
   send("   " + args.nick + ": list (print list of available keywords)")
   send("   " + args.nick + ": blame [key] (show user who created [key])")
+  send("   " + args.nick + ": help (print this help message)")
 
 # Connect to the server.
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print("Attempting to connect to " + args.server + ":" + args.channel + " on port " + str(args.port) + " with username " + args.nick)
-ircsock.connect((args.server, args.port)) # Connect to the server using port 6667.
+ircsock.connect((args.server, args.port)) # Connect to the server.
 ircsock.send("USER " + args.nick + " " + args.nick + " " + args.nick + " :.\n") # Authenticate the bot.
 ircsock.send("NICK " + args.nick + "\n") # Assign the nickname to the bot.
 
