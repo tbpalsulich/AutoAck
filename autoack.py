@@ -30,8 +30,12 @@ parser.add_argument('channel',         nargs=1,               type=str,      hel
 
 args = parser.parse_args()
 
+# If the channel name doesn't start with a '#', prepend one.
+args.channel = args.channel[0]
+if args.channel != "#": args.channel = "#" + args.channel
+
 # Substring used to split the received message into the actual message content
-splitter = "PRIVMSG " + args.channel[0] + " :"
+splitter = "PRIVMSG " + args.channel + " :"
 
 # Time used to prevent sending messages while in quiet mode.
 can_send_after = datetime.now()
@@ -57,11 +61,10 @@ def pong(data):
 # Send a message to the connected server.
 def send(message):
   if datetime.now() > can_send_after:
-    ircsock.send("PRIVMSG " + args.channel[0] + " :" + message + "\n")
+    ircsock.send("PRIVMSG " + args.channel + " :" + message + "\n")
 
-# Join the given channel. If the name doesn't start with a '#', prepend one.
+# Join the given channel.
 def join_channel(channel):
-  if channel[0] != "#": channel = "#" + channel
   ircsock.send("JOIN " + channel + "\n")
 
 # Respond to any keywords from the map `commands` in the string `message`.
@@ -99,19 +102,19 @@ def send_help():
 
 # Connect to the server.
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print("Attempting to connect to " + args.server + ":" + args.channel[0] + " on port " + str(args.port) + " with username " + args.nick)
+print("Attempting to connect to " + args.server + ":" + args.channel + " on port " + str(args.port) + " with username " + args.nick)
 ircsock.connect((args.server, args.port)) # Connect to the server using port 6667.
 ircsock.send("USER " + args.nick + " " + args.nick + " " + args.nick + " :.\n") # Authenticate the bot.
 ircsock.send("NICK " + args.nick + "\n") # Assign the nickname to the bot.
 
-join_channel(args.channel[0])
+join_channel(args.channel)
 
 # Loop forever, waiting for messages to arrive.
 while 1:
   message = ircsock.recv(2048) # Receive data from the server.
   message = message.strip('\n\r') # Remove any unnecessary linebreaks.
 
-  print(message)
+  print message
 
   if "PING :" in message: pong(message)
 
