@@ -54,6 +54,15 @@ default_commands = {
 # Map where chatroom members can have the bot "learn" commands.
 user_commands = {}
 
+# Check whether the given string is a positive number.
+# Based on http://stackoverflow.com/questions/354038/how-do-i-check-if-a-string-is-a-number-in-python.
+def is_positive_number(s):
+    try:
+        s = float(s)
+        return s > 0
+    except ValueError:
+        return False
+
 # Respond to a PING from the server.
 def pong(data):
   ircsock.send("PONG " + data.split()[1] + "\n")  
@@ -139,7 +148,7 @@ while 1:
       send_help()
     elif split[1] == "quiet" and len(split) == 2:
       can_send_after = datetime.now() + timedelta(seconds=args.quiet)
-    elif split[1] == "quiet" and len(split) == 3:
+    elif split[1] == "quiet" and len(split) == 3 and is_positive_number(split[2]):
       can_send_after = datetime.now() + timedelta(seconds=int(split[2]))
     elif split[1] == "speak" and len(split) == 2:
       can_send_after = datetime.now()
@@ -147,7 +156,7 @@ while 1:
       send("Builtin commands: [" + ", ".join(default_commands) + "]")
       send("User commands: [" + ", ".join(user_commands) + "]")
     else:
-      send("Yes?")
+      send("How may I help you?")
   else:   # Only handle messages that aren't sent directly to the bot.
     handle(message.lower(), default_commands)
     handle(message.lower(), user_commands)
