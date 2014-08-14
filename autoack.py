@@ -17,24 +17,21 @@ limitations under the License.
 # This bot is a result of a tutoral covered on http://shellium.org/wiki.
 import socket
 import sys
+import argparse
 from datetime import datetime
 from datetime import timedelta
 
-# Check if we need to print help.
-if len(sys.argv) == 1 or len(sys.argv) > 5 or sys.argv[2].find("#") != 0:
-  print("Usage: python autoack.py quiet-seconds #channel [nick [server]]")
-  sys.exit()
+parser = argparse.ArgumentParser(description='An IRC bot used to respond to keywords automatically.')
+parser.add_argument('-n', '--nick',    nargs=1, default='AutoAck',           help='Username of the bot')
+parser.add_argument('-s', '--server',  nargs=1, default='chat.freenode.net', help='Server to connect to')
+parser.add_argument('-q', '--quiet',   nargs=1, default=30,   type=int,      help='Default number of seconds to stay quiet when told')
+parser.add_argument('-p', '--port',    nargs=1, default=6667, type=int,      help='Port to use when connecting to the server.')
+parser.add_argument('channel',         nargs=1,               type=str,      help='Channel to connect to.')
 
-# Variables for how to connect the bot.
-
-quiet_seconds = 30 if len(sys.argv) < 3 else int(sys.argv[1])
-channel = sys.argv[2] # Channel
-botnick = "AutoAck" if len(sys.argv) < 4 else sys.argv[3] # Nickname
-server = "chat.freenode.net" if len(sys.argv) < 5 else sys.argv[4] # Server
-port = 6667 # Port to connect on.
+args = parser.parse_args()
 
 # Substring used to split the received message into the actual message content
-splitter = "PRIVMSG " + channel + " :"
+splitter = "PRIVMSG " + args.channel[0] + " :"
 
 # Time used to prevent sending messages while in quiet mode.
 can_send_after = datetime.now()
@@ -60,9 +57,11 @@ def pong(data):
 # Send a message to the connected server.
 def send(message):
   if datetime.now() > can_send_after:
-    ircsock.send("PRIVMSG " + channel + " :" + message + "\n")
+    ircsock.send("PRIVMSG " + args.channel[0] + " :" + message + "\n")
 
+# Join the given channel. If the name doesn't start with a '#', prepend one.
 def join_channel(channel):
+  if channel[0] != "#": channel = "#" + channel
   ircsock.send("JOIN " + channel + "\n")
 
 # Respond to any keywords from the map `commands` in the string `message`.
@@ -95,17 +94,17 @@ def forget(key):
 
 def send_help():
   send("Available commands:")
-  send("   " + botnick + ": learn [key] [value]")
-  send("   " + botnick + ": forget [key]")
+  send("   " + args.nick + ": learn [key] [value]")
+  send("   " + args.nick + ": forget [key]")
 
 # Connect to the server.
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print("Attempting to connect to " + server + ":" + channel + " on port " + str(port) + " with username " + botnick)
-ircsock.connect((server, port)) # Connect to the server using port 6667.
-ircsock.send("USER " + botnick + " " + botnick + " " + botnick + " :.\n") # Authenticate the bot.
-ircsock.send("NICK " + botnick + "\n") # Assign the nickname to the bot.
+print("Attempting to connect to " + args.server + ":" + args.channel[0] + " on port " + str(args.port) + " with username " + args.nick)
+ircsock.connect((args.server, args.port)) # Connect to the server using port 6667.
+ircsock.send("USER " + args.nick + " " + args.nick + " " + args.nick + " :.\n") # Authenticate the bot.
+ircsock.send("NICK " + args.nick + "\n") # Assign the nickname to the bot.
 
-join_channel(channel)
+join_channel(args.channel[0])
 
 # Loop forever, waiting for messages to arrive.
 while 1:
@@ -125,7 +124,7 @@ while 1:
   # Convert to lowercase and split the message based on whitespace.
   split = message.lower().split()
 
-  if split[0] == botnick.lower() + ":":   # Command addressed to the bot (e.g. learn or forget).
+  if split[0] == args.nick.lower() + ":":   # Command addressed to the bot (e.g. learn or forget).
     if split[1] == "learn" and len(split) > 2:
       learn(split[2], message.split()[3:])
     if split[1] == "forget":
