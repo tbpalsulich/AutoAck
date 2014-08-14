@@ -101,6 +101,7 @@ def send_help():
   send("   " + args.nick + ": forget [key]")
   send("   " + args.nick + ": quiet")
   send("   " + args.nick + ": quiet [seconds]")
+  send("   " + args.nick + ": speak")
 
 # Connect to the server.
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -140,6 +141,8 @@ while 1:
       can_send_after = datetime.now() + timedelta(seconds=quiet_seconds)
     elif split[1] == "quiet" and len(split) == 3:
       can_send_after = datetime.now() + timedelta(seconds=int(split[2]))
+    elif split[1] == "speak" and len(split) == 2:
+      can_send_after = datetime.now()
     else:
       send("Yes?")
   else:   # Only handle messages that aren't sent directly to the bot.
