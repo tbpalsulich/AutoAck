@@ -34,4 +34,5 @@ Bot commands:
    AutoAck: speak (override a previous quiet command)
    AutoAck: list (print list of available keywords)
    AutoAck: blame [key] (show user who created [key])
+   AutoAck: help (print this help message)
 ```
