@@ -130,12 +130,16 @@ while 1:
   if split[0] == args.nick.lower() + ":":   # Command addressed to the bot (e.g. learn or forget).
     if split[1] == "learn" and len(split) > 2:
       learn(split[2], message.split()[3:])
-    if split[1] == "forget":
+    elif split[1] == "forget" and len(split) == 3:
       forget(split[2])
-    if split[1] == "help":
+    elif split[1] == "help":
       send_help()
-    if split[1] == "quiet":
+    elif split[1] == "quiet" and len(split) == 2:
       can_send_after = datetime.now() + timedelta(seconds=quiet_seconds)
+    elif split[1] == "quiet" and len(split) == 3:
+      can_send_after = datetime.now() + timedelta(seconds=int(split[2]))
+    else:
+      send("Yes?")
   else:   # Only handle messages that aren't sent directly to the bot.
     handle(message.lower(), default_commands)
     handle(message.lower(), user_commands)
