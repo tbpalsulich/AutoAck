@@ -36,3 +36,19 @@ Bot commands:
    AutoAck: blame [key] (show user who created [key])
    AutoAck: help (print this help message)
 ```
+
+Run persistently:
+-----------------
+Install `supervisord` by running `[sudo] easy_install supervisord`. Then edit
+the `command=...` line in the config file `supervisord.conf` to enter the proper
+channel, server, port, etc. Then start the daemon by running
+```
+supervisord -c ./supervisord.conf
+```
+
+Contributing:
+-------------
+All pull requests, feature requests, bug reports, and questions are welcome!
+If you want to contribute, fork, branch, commit, and send a pull request!
+[Here](https://gun.io/blog/how-to-github-fork-branch-and-pull-request/) is a
+good tutorial on this git workflow.
