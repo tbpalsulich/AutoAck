@@ -23,8 +23,39 @@ import shelve
 from datetime import datetime
 from datetime import timedelta
 
+# imports for Twitter functionality
+import ConfigParser
+import json
+
+from tweepy.streaming import StreamListener
+from tweepy import OAuthHandler
+from tweepy import Stream
+from tweepy import API
+
+from nltk.chat import eliza
+
 # Time used to prevent sending messages while in quiet mode.
 can_send_after = datetime.now()
+
+# Beginning of Twitter variables
+config = ConfigParser.ConfigParser()
+config.read('.twitter')
+
+consumer_key = config.get('apikey', 'key')
+consumer_secret = config.get('apikey', 'secret')
+access_token = config.get('token', 'token')
+access_token_secret = config.get('token', 'secret')
+stream_rule = config.get('app', 'rule')
+account_screen_name = config.get('app', 'account_screen_name').lower() 
+account_user_id = config.get('app', 'account_user_id')
+
+auth = OAuthHandler(consumer_key, consumer_secret)
+auth.set_access_token(access_token, access_token_secret)
+twitterApi = API(auth)
+
+chatbot = eliza.Chat(eliza.pairs)
+# End of Twitter variables
+
 
 # Check whether the given string is a positive number.
 # Based on http://stackoverflow.com/questions/354038/how-do-i-check-if-a-string-is-a-number-in-python.
@@ -79,16 +110,54 @@ def forget(key):
   else:
     send("Maybe you're the one forgetting...")
 
+# Monitor the user account for the given twitter account.
+# Auto-reply Ack to any tweet to that user stream
+# https://dev.twitter.com/docs/streaming-apis/streams/user
+class ReplyToTweet(StreamListener):
+    def on_data(self, data):
+        print data
+        tweet = json.loads(data.strip())
+        
+        retweeted = tweet.get('retweeted')
+        from_self = tweet.get('user',{}).get('id_str','') == account_user_id
+
+        if retweeted is not None and not retweeted and not from_self:
+
+            tweetId = tweet.get('id_str')
+            screenName = tweet.get('user',{}).get('screen_name')
+            tweetText = tweet.get('text')
+
+            #chatResponse = chatbot.respond(tweetText)
+
+            replyText = '@' + screenName + ' ' + 'ACK' #This could be chatResponse but for now is just ACK
+
+            #check if repsonse is over 140 char
+            if len(replyText) > 140:
+                replyText = replyText[0:137] + '...'
+
+            print('Tweet ID: ' + tweetId)
+            print('From: ' + screenName)
+            print('Tweet Text: ' + tweetText)
+            print('Reply Text: ' + replyText)
+
+            # If rate limited, the status posts should be queued up and sent on an interval
+            twitterApi.update_status(replyText, tweetId)
+
+    def on_error(self, status):
+        print status
+
 def send_help():
   send("Available commands:")
-  send("   " + args.nick + ": learn [key] [value] (learn to say [value] after [key])")
+  send("   " + args.nick + ": autotweet (monitor the defined twitter account and AutoAck Tweets)")
+  send("   " + args.nick + ": blame [key] (show user who created [key])")
   send("   " + args.nick + ": forget [key] (forget user learned keyword [key])")
+  send("   " + args.nick + ": help (print this help message)")  
+  send("   " + args.nick + ": learn [key] [value] (learn to say [value] after [key])")
+  send("   " + args.nick + ": list (print list of available keywords)")
   send("   " + args.nick + ": quiet [seconds] (don't talk for optional number of [seconds])")
   send("   " + args.nick + ": speak (override a previous quiet command)")
-  send("   " + args.nick + ": list (print list of available keywords)")
-  send("   " + args.nick + ": blame [key] (show user who created [key])")
-  send("   " + args.nick + ": help (print this help message)")
-
+  send("   " + args.nick + ": tweet (send a tweet to the defined twitter account)")
+  
 # Loop forever, waiting for messages to arrive.
 def main_loop():
   global can_send_after
@@ -135,6 +204,10 @@ def main_loop():
           send(split[2] + " was created by " + user_commands[split[2]][1], user)
         else:
           send("That's not a valid keyword!", user)
+      elif split[1] == "autotweet" and len(split) > 2:
+        streamListener = ReplyToTweet()
+        twitterStream = Stream(auth, streamListener)
+        twitterStream.userstream(_with='user')
       else:
         send("How may I help you?", user)
     else:   # Only handle messages that aren't sent directly to the bot.
