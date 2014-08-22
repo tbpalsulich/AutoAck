@@ -1,12 +1,12 @@
 [apikey]
-key = xkOKCpwP8ZpjZ1zRQX9z1BMmv 
-secret = lnSGywfLGd5FQqWmnvUyxYHT8DRt9irfqtSmAnYU901aQwml2G
+key = your_api_key 
+secret = your_api_secret
 
 [token]
-token =  489482658-UKTjtkuivwDU4kvxPMmjkC6Sei6UhunFwdYUI7ft
-secret =  fds2Cez9VDY6yFYNnszJVfsDVVzckeaTTW3AWUMTiCHum
+token = your_access_token
+secret = your_access_secret
 
 [app]
-rule =  @hectorMcSpector
-account_screen_name = Lewis John McGibbney
+rule = @AccountOwnerOfApp
+account_screen_name = AccountOwnerOfApp
 account_user_id = IDofAccountOwnerOfApp
