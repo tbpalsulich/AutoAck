@@ -1,0 +1,12 @@
+[apikey]
+key = your_api_key 
+secret = your_api_secret
+
+[token]
+token = your_access_token
+secret = your_access_secret
+
+[app]
+rule = @AccountOwnerOfApp
+account_screen_name = AccountOwnerOfApp
+account_user_id = IDofAccountOwnerOfApp
