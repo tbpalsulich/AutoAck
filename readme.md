@@ -5,6 +5,16 @@ IRC bot created for the JPL DARPA XDATA team chatroom.
 
 \#gitpush
 
+Pre-requisites:
+===
+
+1. pip install tweepy
+2. pip install nltk*
+3. cp -R .twitter.sample .twitter
+4. edit .twitter file and add in your API key for twitter and other params
+
+* note that you may need to upgrade distribute, by running easy_install -U distribute
+
 Command line usage:
 -------------------
 ```
@@ -34,6 +44,7 @@ Bot commands:
    AutoAck: speak (override a previous quiet command)
    AutoAck: list (print list of available keywords)
    AutoAck: blame [key] (show user who created [key])
+   AutoAck: tweet (send a tweet to the defined twitter account)
    AutoAck: help (print this help message)
 ```
 
