@@ -5,7 +5,7 @@ IRC bot created for the JPL DARPA XDATA team chatroom.
 
 \#gitpush
 
-Pre-requisites:
+Pre-requisites
 ===
 
 1. pip install tweepy
