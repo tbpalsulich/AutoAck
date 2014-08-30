@@ -62,4 +62,8 @@ Contributing:
 All pull requests, feature requests, bug reports, and questions are welcome!
 If you want to contribute, fork, branch, commit, and send a pull request!
 [Here](https://gun.io/blog/how-to-github-fork-branch-and-pull-request/) is a
+<<<<<<< HEAD
 good tutorial on this git workflow.
+=======
+good tutorial on this git workflow.
+>>>>>>> f5e7de2de83dd74634a7779206ab27cbe33146fc
