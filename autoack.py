@@ -34,6 +34,9 @@ from tweepy import API
 
 from nltk.chat import eliza
 
+# imports for Facebook functionality
+import facebook
+
 # Time used to prevent sending messages while in quiet mode.
 can_send_after = datetime.now()
 
@@ -55,6 +58,11 @@ twitterApi = API(auth)
 
 chatbot = eliza.Chat(eliza.pairs)
 # End of Twitter variables
+
+# Beginning of Facebook variables
+config.read('.facebook')
+facebook_token = config.get('token', 'token')
+# End of Facebook variables
 
 
 # Check whether the given string is a positive number.
@@ -146,6 +154,24 @@ class ReplyToTweet(StreamListener):
     def on_error(self, status):
         print status
 
+# Simply posts to a users wall
+class PostToWall():
+    def on_data(self, data):
+        graph = facebook.GraphAPI(access_token=facebook_token, version='2.2')
+         
+        attachment =  {
+            'name': '!!AutoAck AckAttack BABY!!',
+            'link': 'https://github.com/tpalsulich/AutoAck',
+            'caption': '#gitpush #ACK #seen #bewm',
+            'description': 'A binary bitblob of AckAttack with some +1, #Aye #gitpush, #rebase and #bewm',
+            'picture': 'https://github.com/tpalsulich/AutoAck/blob/master/logos/auto-ack.logo.png'
+        }
+
+        graph.put_wall_post(message=data.strip(), attachment=attachment)
+
+    def on_error(self, status):
+        print status
+
 def send_help():
   send("Available commands:")
   send("   " + args.nick + ": autotweet (monitor the defined twitter account and AutoAck Tweets)")
@@ -156,7 +182,8 @@ def send_help():
   send("   " + args.nick + ": list (print list of available keywords)")
   send("   " + args.nick + ": quiet [seconds] (don't talk for optional number of [seconds])")
   send("   " + args.nick + ": speak (override a previous quiet command)")
-  send("   " + args.nick + ": tweet (send a tweet to the defined twitter account)")
+  send("   " + args.nick + ": autotweet (send a tweet to the defined twitter account)")
+  send("   " + args.nick + ": autofbook (post a message to the wall of the defined facebook account)")
   
 # Loop forever, waiting for messages to arrive.
 def main_loop():
@@ -208,6 +235,10 @@ def main_loop():
         streamListener = ReplyToTweet()
         twitterStream = Stream(auth, streamListener)
         twitterStream.userstream(_with='user')
+        send("AutoTweeting...", user, True)
+      elif split[1] == "autofbook" and len(split) > 2:
+        PostToWall()
+        send("AutoFbooking...", user, True)
       else:
         send("How may I help you?", user)
     else:   # Only handle messages that aren't sent directly to the bot.
