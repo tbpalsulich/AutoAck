@@ -9,6 +9,7 @@ Install
 =======
 
 1. `git clone git@github.com:tpalsulich/AutoAck.git`
+2. `cd AutoAck`
 2. `virtualenv venv`
 3. `. venv/bin/activate`
 2. `pip install -r requirements.txt`
