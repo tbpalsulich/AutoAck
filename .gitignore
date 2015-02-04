@@ -2,3 +2,4 @@ autoack.shelf*
 autoack.log
 supervisord.pid
 .twitter
+.facebook
