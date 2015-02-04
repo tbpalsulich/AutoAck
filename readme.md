@@ -11,10 +11,10 @@ Pre-requisites
 1. pip install tweepy
 2. pip install nltk*
 3. cp -R .twitter.sample .twitter
-4. edit .twitter file and add in your API key for twitter and other params
-5. pip install facebook-sdk
-
-* note that you may need to upgrade distribute, by running easy_install -U distribute
+4. cp -R .facebook.sample .facebook
+5. edit .twitter file and add in your API key for twitter and other params
+6. edit .facebook file and add in your access token
+7. pip install facebook-sdk
 
 Command line usage:
 -------------------
