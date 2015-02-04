@@ -3,3 +3,4 @@ autoack.log
 supervisord.pid
 .twitter
 .facebook
+venv

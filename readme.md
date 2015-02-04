@@ -5,16 +5,17 @@ IRC bot created for the JPL DARPA XDATA team chatroom.
 
 \#gitpush
 
-Pre-requisites
-===
+Install
+=======
 
-1. pip install tweepy
-2. pip install nltk*
+1. git clone git@github.com:tpalsulich/AutoAck.git
+2. virtualenv venv
+3. . venv/bin/activate
+2. pip install -r requirements.txt
 3. cp -R .twitter.sample .twitter
 4. cp -R .facebook.sample .facebook
 5. edit .twitter file and add in your API key for twitter and other params
 6. edit .facebook file and add in your access token
-7. pip install facebook-sdk
 
 Command line usage:
 -------------------
